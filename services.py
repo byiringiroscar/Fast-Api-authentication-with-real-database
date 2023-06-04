@@ -47,5 +47,11 @@ async def create_token(user: _models.User):
 
     return dict(access_token=token, token_type="bearer")
 
-    
+async def authenticate_user(email: str, password: str, db: _orm.Session):
+    user = await get_user_by_email(email=email, db=db)
+    if not user:
+        return False
+    if not user.verify_password(password=password):
+        return False
+    return user
 
