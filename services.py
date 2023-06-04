@@ -72,3 +72,7 @@ async def create_post(user: _schemas.User, db: _orm.Session, post: _schemas.Post
     db.commit()
     db.refresh(post)
     return _schemas.Post.from_orm(post)
+
+async def get_posts(user: _schemas.User, db: _orm.Session):
+    posts = db.query(_models.Post).filter_by(owner_id=user.id)
+    return list(map(_schemas.Post.from_orm, posts))

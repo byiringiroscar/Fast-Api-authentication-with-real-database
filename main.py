@@ -1,3 +1,4 @@
+from typing import List
 import fastapi as _fastapi
 import fastapi.security as _security
 import sqlalchemy.orm as _orm
@@ -36,3 +37,9 @@ async def create_post(post: _schemas.PostCreate,
                       user: _schemas.User = _fastapi.Depends(_services.get_current_user),
                       db: _orm.Session = _fastapi.Depends(_services.get_db)):
         return await _services.create_post(user=user, db=db, post=post)
+
+@app.get("/api/posts", response_model=list[_schemas.Post])
+async def get_posts(user: _schemas.User = _fastapi.Depends(_services.get_current_user),
+                     db: _orm.Session = _fastapi.Depends(_services.get_db)):
+    return await _services.get_posts(user=user, db=db)
+     
