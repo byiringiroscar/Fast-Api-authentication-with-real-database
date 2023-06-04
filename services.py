@@ -1,4 +1,5 @@
 import sqlalchemy.orm as _orm
+import fastapi.security as _security
 import fastapi as _fastapi
 import email_validator as _email_check
 import passlib.hash as _hash
@@ -9,6 +10,8 @@ import models as _models
 import schemas as _schemas
 
 _JWT_SECRET = "thisisnotverysafe"
+oauth2schema = _security.OAuth2PasswordBearer("/api/token")
+
 
 def _create_database():
     return _database.Base.metadata.create_all(bind=_database.engine)
@@ -55,3 +58,10 @@ async def authenticate_user(email: str, password: str, db: _orm.Session):
         return False
     return user
 
+async def get_current_user(db: _orm.Session=_fastapi.Depends(get_db), token: str=_fastapi.Depends(oauth2schema)):
+    try:
+        payload = _jwt.decode(token, _JWT_SECRET, algorithms=["HS256"])
+        user = db.query(_models.User).get(payload["id"])
+    except:
+        raise _fastapi.HTTPException(status_code=401, detail="Invalid email or password")
+    return _schemas.User.from_orm(user)
